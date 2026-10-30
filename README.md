@@ -52,11 +52,7 @@ The primary analysis purpose of `file-type-verifier` is to proactively detect an
 2.  **Navigate to the Directory:** Use the `cd` command to navigate to the directory where the tool is located.
 3.  **Install Dependencies:** Install required Python dependencies using `pip`:
 
-    ```bash
-    pip install argparse
-    ```
-
-    **Note:** `pathlib` and `logging` are part of Python's standard library and should not need explicit installation.
+    **Note:** `argparse`, `pathlib` and `logging` are part of Python's standard library and do not need explicit installation. The tool has no third-party dependencies.
 
 4.  **Verify Installation:** Run the script with the `-h` or `--help` option to ensure it's installed correctly (see Usage Examples).
 
@@ -65,32 +61,28 @@ The primary analysis purpose of `file-type-verifier` is to proactively detect an
 Here's the basic command line structure:
 
 ```bash
-python main.py <filename>
+python main.py <filename> --expected-type <jpg|png|gif|pdf>
 ```
 
-*   **Example 1: Checking a Text File**
-    ```bash
-    python main.py my_document.txt
-    ```
-    *   **Safeguard:** If `my_document.txt` is actually an executable disguised as a text file, the tool will report a mismatch and alert about the discrepancy.
+The `--expected-type` option is required, and the only expected types the tool supports are `jpg`, `png`, `gif`, and `pdf`.
 
-*   **Example 2: Checking a PNG Image**
+*   **Example 1: Checking a PNG Image**
     ```bash
-    python main.py image.png
+    python main.py image.png --expected-type png
     ```
    *   **Safeguard:** If the content of `image.png` does not match a PNG format, the tool will report an error and prevent the user from assuming the file is safe to open.
 
-*   **Example 3: Checking a Script (Python)**
+*   **Example 2: Checking a JPEG Image**
     ```bash
-    python main.py my_script.py
-    ```
-   *   **Safeguard:** This ensures the script you think you are executing is indeed a Python script, preventing execution of potentially malicious content with the python extension.
-
-*   **Example 4: Using with an explicit output**
-   ```bash
-    python main.py  my_malicious.jpg 
+    python main.py my_malicious.jpg --expected-type jpg
     ```
    *   **Safeguard:** Reports if `my_malicious.jpg` is not really a JPEG but perhaps an executable, avoiding execution of a disguised harmful payload.
+
+*   **Example 3: Checking a PDF Document**
+    ```bash
+    python main.py document.pdf --expected-type pdf
+    ```
+   *   **Safeguard:** If the content of `document.pdf` does not start with the PDF signature, the tool will report a mismatch and alert about the discrepancy.
 
 **10. Implementation Details Focused on Security**
 
