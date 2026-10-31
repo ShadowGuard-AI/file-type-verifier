@@ -7,10 +7,10 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 
 # Magic bytes for common file types (add more as needed)
 MAGIC_BYTES = {
-    "jpg": b"\xFF\xD8\xFF",
-    "png": b"\x89PNG\r\n\x1a\n",
-    "gif": b"GIF87a",
-    "pdf": b"%PDF-",
+    "jpg": (b"\xFF\xD8\xFF",),
+    "png": (b"\x89PNG\r\n\x1a\n",),
+    "gif": (b"GIF87a", b"GIF89a"),
+    "pdf": (b"%PDF-",),
 }
 
 
@@ -62,13 +62,13 @@ def verify_file_signature(file_path, expected_type):
             return False
 
         with path.open("rb") as file:
-            magic_bytes = MAGIC_BYTES.get(expected_type)
-            if not magic_bytes:
+            signatures = MAGIC_BYTES.get(expected_type)
+            if not signatures:
                 logging.error(f"No magic bytes defined for the expected type: {expected_type}")
                 return False
 
-            file_signature = file.read(len(magic_bytes))
-            if file_signature == magic_bytes:
+            file_signature = file.read(max(len(s) for s in signatures))
+            if any(file_signature[:len(s)] == s for s in signatures):
                 logging.info(f"File '{file_path}' matches the expected type: {expected_type}.")
                 return True
             else:
