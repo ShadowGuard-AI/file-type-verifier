@@ -32,6 +32,9 @@ def setup_argparse():
     parser.add_argument(
         "--expected-type",
         type=str,
+        # The accepted values for --expected-type are the table's keys, taken
+        # when the parser is built. Adding a type to MAGIC_BYTES extends the
+        # command line by itself; there is no second list to keep in step.
         choices=MAGIC_BYTES.keys(),
         required=True,
         help="Expected file type (e.g., jpg, png, gif, pdf)."
@@ -67,6 +70,12 @@ def verify_file_signature(file_path, expected_type):
                 logging.error(f"No magic bytes defined for the expected type: {expected_type}")
                 return False
 
+            # Only as many bytes as the longest signature for the expected type
+            # are read, eight at most in the current table. Each candidate is then
+            # compared against its own length of prefix, which is how the two GIF
+            # variants share one entry despite both being six bytes.
+            # A file shorter than its signature compares unequal on the slice and
+            # fails cleanly, with no special empty or truncated case.
             file_signature = file.read(max(len(s) for s in signatures))
             if any(file_signature[:len(s)] == s for s in signatures):
                 logging.info(f"File '{file_path}' matches the expected type: {expected_type}.")
@@ -102,6 +111,9 @@ def main():
     # Verify file signature
     result = verify_file_signature(file_path, expected_type)
 
+    # Mismatch, missing file, and read error all arrive here as the same
+    # False and the same exit 1. Which of the three happened is in the log
+    # line written at the point of failure, nowhere else.
     if not result:
         exit(1)  # Exit with error code if verification fails
     else:
